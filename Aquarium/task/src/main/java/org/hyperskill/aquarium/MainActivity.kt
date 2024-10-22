@@ -1,16 +1,13 @@
 package org.hyperskill.aquarium
 
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.squareup.picasso.Callback
-import com.squareup.picasso.Picasso
+import org.hyperskill.aquarium.adapters.AquariumAdapter
 import org.hyperskill.aquarium.databinding.ActivityMainBinding
+import org.hyperskill.aquarium.model.Aquarium
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
-    private var initialPage = 0
     private val listOfAnimalsImages by lazy {
         intent.getSerializableExtra("imageAnimals") as? List<String> ?: listOf(
             "https://ucarecdn.com/42045846-b968-4a88-81ec-df73bec4fcb7/",
@@ -64,51 +61,25 @@ class MainActivity : AppCompatActivity() {
                     "One kaluga that was caught in China is estimated to be over 100 years old."
         )
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        displayAnimal(initialPage)
         binding.apply {
-            btnNext.setOnClickListener { navigateAnimal(1) }
-            btnPrevious.setOnClickListener { navigateAnimal(-1) }
+            viewpager2.adapter = AquariumAdapter(this@MainActivity, dataSource())
         }
     }
-    private fun displayAnimal(page: Int) {
-        val imageUrl = listOfAnimalsImages[page]
-        val animalName = listOfAnimalsNames[page]
-        val animalDescription = listOfAnimalsDescriptions[page]
 
-        binding.apply {
-            progressBar.visibility = View.VISIBLE
-            tvName.text = animalName
-            tvDescription.text = animalDescription
-
-            Picasso.get()
-                .load(imageUrl)
-                .fit().centerInside()
-                .placeholder(R.drawable.placeholder)
-                .error(R.drawable.error)
-                .into(imageView, object : Callback {
-                    override fun onSuccess() {
-                        progressBar.visibility = View.GONE
-                    }
-
-                    override fun onError(e: Exception?) {
-                        progressBar.visibility = View.VISIBLE
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Error! Check your network connectivity",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                })
+    private fun dataSource(): List<Aquarium> {
+        val minSize = minOf(listOfAnimalsImages.size, listOfAnimalsNames.size, listOfAnimalsDescriptions.size)
+        val aquariums = mutableListOf<Aquarium>()
+        
+        for (i in 0 until minSize) {
+            aquariums.add(Aquarium(listOfAnimalsImages[i], listOfAnimalsNames[i], listOfAnimalsDescriptions[i]))
         }
-    }
-    private fun navigateAnimal(step: Int) {
-        initialPage = (initialPage + step + listOfAnimalsImages.size) % listOfAnimalsImages.size
-        displayAnimal(initialPage)
+        return aquariums
     }
 }
 
