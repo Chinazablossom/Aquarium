@@ -2,6 +2,7 @@ package org.hyperskill.aquarium
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.tabs.TabLayoutMediator
 import org.hyperskill.aquarium.adapters.AquariumAdapter
 import org.hyperskill.aquarium.databinding.ActivityMainBinding
 import org.hyperskill.aquarium.model.Aquarium
@@ -69,13 +70,16 @@ class MainActivity : AppCompatActivity() {
 
         binding.apply {
             viewpager2.adapter = AquariumAdapter(this@MainActivity, dataSource())
+            TabLayoutMediator(tabLayout,viewpager2){tab,position->
+                tab.text = dataSource()[position].nameAnimals
+            }.attach()
         }
     }
 
     private fun dataSource(): List<Aquarium> {
         val minSize = minOf(listOfAnimalsImages.size, listOfAnimalsNames.size, listOfAnimalsDescriptions.size)
         val aquariums = mutableListOf<Aquarium>()
-        
+
         for (i in 0 until minSize) {
             aquariums.add(Aquarium(listOfAnimalsImages[i], listOfAnimalsNames[i], listOfAnimalsDescriptions[i]))
         }
